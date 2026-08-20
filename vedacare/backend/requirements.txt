@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+pyjwt
+passlib[bcrypt]
+python-multipart
+apscheduler
+python-dotenv
