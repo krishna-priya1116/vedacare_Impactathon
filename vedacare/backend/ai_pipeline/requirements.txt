@@ -1,0 +1,6 @@
+marker-pdf
+langdetect
+deep-translator
+gTTS
+requests
+python-dotenv
