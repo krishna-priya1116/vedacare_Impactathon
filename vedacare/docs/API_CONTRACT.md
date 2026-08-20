@@ -234,3 +234,5 @@ RESPONSE: { "items": [ { "prescription_id":1,"patient_name":"string","issue":"lo
 
 ## Field conventions
 - IDs: integers. Booleans: `true`/`false`. All list responses wrap in a named key (`medications`, `alerts`, etc.), never a bare array — keeps future pagination additive, not breaking.
+
+
