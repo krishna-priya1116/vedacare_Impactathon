@@ -117,6 +117,25 @@ export async function markInteractionReviewed(flagId) {
   return { success: true };
 }
 
+export async function generatePrescriptionSummary(patientName, language, medications) {
+  try {
+    const res = await fetch("http://localhost:8000/prescriptions/summary", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        patient_name: patientName,
+        language: language,
+        medications: medications
+      })
+    });
+    if (!res.ok) throw new Error("Failed to generate summary");
+    return await res.json();
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+}
+
 // ===== Medications =====
 
 export async function getPatientMedications(patientId) {

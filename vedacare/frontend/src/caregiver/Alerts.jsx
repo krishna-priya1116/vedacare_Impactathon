@@ -1,37 +1,36 @@
-import { useState, useEffect } from 'react';
-import { getAlerts, reviewAlert, resolveAlert } from '../api/client';
+import { useState } from 'react';
+import { useAlerts } from '../context/AlertsContext';
 import SafetyAlertCard from '../components/SafetyAlertCard';
 import { Bell, ShieldAlert, Clock, Info, CheckCircle2 } from 'lucide-react';
 
 export default function Alerts() {
-  const [alerts, setAlerts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { alerts, loading, error, handleReviewAlert, handleResolveAlert, loadAlerts } = useAlerts();
   const [filter, setFilter] = useState('all'); // all, safety, missed_dose, system
 
-  useEffect(() => {
-    loadAlerts();
-  }, []);
-
-  const loadAlerts = async () => {
-    try {
-      const data = await getAlerts(1); // Mock caregiver ID
-      setAlerts(data.alerts);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleReview = async (alert) => {
-    await reviewAlert(alert.id);
-    setAlerts(alerts.map(a => a.id === alert.id ? { ...a, status: 'reviewed' } : a));
+    // If it's a safety alert, mark as reviewed, else resolve
+    if (alert.type === 'safety') {
+      await handleReviewAlert(alert.id);
+    } else {
+      await handleResolveAlert(alert.id);
+    }
   };
 
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col justify-center items-center h-64 fade-in">
+        <ShieldAlert size={48} className="text-danger mb-4" />
+        <h3 className="text-xl font-bold text-text mb-2">Failed to load alerts</h3>
+        <p className="text-text-secondary mb-4">{error}</p>
+        <button onClick={loadAlerts} className="btn btn-primary">Try Again</button>
       </div>
     );
   }
@@ -131,11 +130,11 @@ export default function Alerts() {
                 <div className="mt-4 pt-3 border-t border-border-light/50 flex gap-3">
                   <button 
                     onClick={() => handleReview(alert)}
-                    disabled={alert.status === 'reviewed'}
-                    className={`btn text-sm ${alert.status === 'reviewed' ? 'bg-success/10 text-success border border-success/20' : 'btn-outline bg-white'}`}
+                    disabled={alert.status === 'reviewed' || alert.status === 'resolved'}
+                    className={`btn text-sm ${alert.status === 'reviewed' || alert.status === 'resolved' ? 'bg-success/10 text-success border border-success/20' : 'btn-outline bg-white'}`}
                   >
                     <CheckCircle2 size={16} />
-                    {alert.status === 'reviewed' ? 'Resolved ✓' : 'Mark Resolved'}
+                    {alert.status === 'reviewed' || alert.status === 'resolved' ? 'Resolved ✓' : 'Mark Resolved'}
                   </button>
                 </div>
               </div>

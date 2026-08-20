@@ -1,14 +1,20 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getPrescriptions, approveMedication } from '../api/client';
+import { getPrescriptions, approveMedication, generatePrescriptionSummary } from '../api/client';
 import { mockPrescription } from '../api/mocks';
-import { ShieldAlert, Check, Edit2, AlertCircle } from 'lucide-react';
+import { ShieldAlert, Check, Edit2, AlertCircle, Volume2, FileText } from 'lucide-react';
 import SafetyAlertCard from '../components/SafetyAlertCard';
 
 export default function ReviewExtractedPlan() {
   const [prescription, setPrescription] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activating, setActivating] = useState(false);
+  
+  // Summary State
+  const [summary, setSummary] = useState(null);
+  const [audioUrl, setAudioUrl] = useState(null);
+  const [generatingSummary, setGeneratingSummary] = useState(true);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -17,8 +23,26 @@ export default function ReviewExtractedPlan() {
     setTimeout(() => {
       setPrescription(mockPrescription);
       setLoading(false);
+      fetchSummary(mockPrescription.medications);
     }, 500);
   }, []);
+
+  const fetchSummary = async (medications) => {
+    // We pass a mock patient name and default language (en) since settings are mocked right now
+    const data = await generatePrescriptionSummary("Meera", "en", medications);
+    if (data) {
+      setSummary(data.summary_text);
+      setAudioUrl(`http://localhost:8000${data.audio_url}`);
+    }
+    setGeneratingSummary(false);
+  };
+
+  const playAudio = () => {
+    if (audioUrl) {
+      const audio = new Audio(audioUrl);
+      audio.play();
+    }
+  };
 
   const handleActivate = async () => {
     setActivating(true);
@@ -66,6 +90,38 @@ export default function ReviewExtractedPlan() {
         >
           {activating ? 'Activating...' : 'Activate Care Plan'}
         </button>
+      </div>
+
+      {/* Patient-Friendly Summary */}
+      <div className="card p-6 mb-8 border-l-4 border-primary">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold flex items-center gap-2 text-text">
+            <FileText className="text-primary" size={24} />
+            Patient Summary
+          </h2>
+          <button 
+            onClick={playAudio} 
+            disabled={!audioUrl || generatingSummary}
+            className="btn btn-outline flex items-center gap-2 hover:bg-primary/10"
+          >
+            <Volume2 size={20} className={audioUrl ? "text-primary" : "text-text-muted"} />
+            Read Aloud
+          </button>
+        </div>
+        
+        {generatingSummary ? (
+          <div className="animate-pulse flex space-x-4">
+            <div className="flex-1 space-y-3 py-1">
+              <div className="h-2 bg-text-muted rounded"></div>
+              <div className="h-2 bg-text-muted rounded w-5/6"></div>
+              <div className="h-2 bg-text-muted rounded w-4/6"></div>
+            </div>
+          </div>
+        ) : (
+          <p className="text-text font-medium leading-relaxed text-lg">
+            {summary || "Summary could not be generated."}
+          </p>
+        )}
       </div>
 
       {/* Safety & Confidence Header */}

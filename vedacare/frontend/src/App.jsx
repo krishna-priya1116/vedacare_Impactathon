@@ -1,15 +1,14 @@
 import { Routes, Route, Link, Outlet } from 'react-router-dom';
 import { ProtectedRoute, useAuth } from './context/AuthContext';
+import { AlertsProvider } from './context/AlertsContext';
 
 import Landing from './auth/Landing';
 import CaregiverSignup from './auth/CaregiverSignup';
 import Login from './auth/Login';
 import PatientJoin from './auth/PatientJoin';
 
-
 import CaregiverLayout from './caregiver/CaregiverLayout';
 import PatientLayout from './patient/PatientLayout';
-
 
 import CaregiverDashboard from './caregiver/Dashboard';
 import CaregiverPatients from './caregiver/Patients';
@@ -19,6 +18,7 @@ import CaregiverTimetable from './caregiver/Timetable';
 import CaregiverAdherence from './caregiver/Adherence';
 import ReviewExtractedPlan from './caregiver/ReviewExtractedPlan';
 import CaregiverAlerts from './caregiver/Alerts';
+import CaregiverSettings from './caregiver/Settings';
 import PatientHome from './patient/Home';
 import PatientMedicines from './patient/Medicines';
 import PatientTimetable from './patient/Timetable';
@@ -38,7 +38,9 @@ export default function App() {
       {/* Caregiver Routes */}
       <Route path="/caregiver" element={
         <ProtectedRoute role="caregiver">
-          <CaregiverLayout />
+          <AlertsProvider>
+            <CaregiverLayout />
+          </AlertsProvider>
         </ProtectedRoute>
       }>
         <Route index element={<CaregiverDashboard />} />
@@ -49,6 +51,7 @@ export default function App() {
         <Route path="prescriptions" element={<CaregiverPrescriptions />} />
         <Route path="prescriptions/review" element={<ReviewExtractedPlan />} />
         <Route path="alerts" element={<CaregiverAlerts />} />
+        <Route path="settings" element={<CaregiverSettings />} />
       </Route>
 
       {/* Patient Routes */}

@@ -27,6 +27,9 @@ from routers.medications import router as medications_router
 from routers.appointments import router as appointments_router
 from routers.alerts import router as alerts_router
 from routers.admin import router as admin_router
+from routers.summary import router as summary_router
+from fastapi.staticfiles import StaticFiles
+import os
 
 
 @asynccontextmanager
@@ -70,6 +73,12 @@ app.include_router(medications_router)
 app.include_router(appointments_router)
 app.include_router(alerts_router)
 app.include_router(admin_router)
+app.include_router(summary_router)
+
+# Mount audio directory
+audio_dir = os.path.join(os.path.dirname(__file__), "ai_pipeline", "audio_cache")
+os.makedirs(audio_dir, exist_ok=True)
+app.mount("/audio", StaticFiles(directory=audio_dir), name="audio")
 
 
 # Standard error response format (per ARCHITECTURE.md §9)

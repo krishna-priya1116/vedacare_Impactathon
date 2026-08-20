@@ -23,10 +23,14 @@ const navItems = [
   { path: '/caregiver/alerts', label: 'Alerts', icon: AlertTriangle },
   { path: '/caregiver/timetable', label: 'Timetable', icon: Clock },
   { path: '/caregiver/adherence', label: 'Adherence', icon: TrendingUp },
+  { path: '/caregiver/settings', label: 'Settings', icon: Settings },
 ];
+
+import { useAlerts } from '../context/AlertsContext';
 
 export default function CaregiverLayout() {
   const { user, logout } = useAuth();
+  const { unreadCount } = useAlerts();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
@@ -114,7 +118,9 @@ export default function CaregiverLayout() {
           <div className="flex items-center gap-4">
             <Link to="/caregiver/alerts" className="relative p-2 text-text-secondary hover:text-primary transition-colors">
               <AlertTriangle size={20} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-danger rounded-full border border-white"></span>
+              {unreadCount > 0 && (
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-danger rounded-full border border-white"></span>
+              )}
             </Link>
           </div>
         </header>
