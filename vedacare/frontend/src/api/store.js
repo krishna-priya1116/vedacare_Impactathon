@@ -43,32 +43,255 @@ function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
+// ═══════════════════════════════════════════════════
+//  Demo data seeding (Impactathon demo only)
+// ═══════════════════════════════════════════════════
+
+function seedDemoData() {
+  const DEMO_PATIENT_ID = 1;
+  const today = new Date().toISOString().split('T')[0];
+
+  // Helper to get date string N days ago
+  const daysAgo = (n) => {
+    const d = new Date();
+    d.setDate(d.getDate() - n);
+    return d.toISOString().split('T')[0];
+  };
+
+  // ── Patient ──
+  const patients = [
+    {
+      id: DEMO_PATIENT_ID,
+      name: 'Meera Shah',
+      age: 68,
+      gender: 'female',
+      phone: '+91 98765 43210',
+      preferred_language: 'hi',
+      photo_url: null,
+      connection_status: 'connected',
+      accessibility_prefs: { text_size: 'large', voice_volume: 80 },
+    },
+  ];
+
+  // ── Fixed connection code 219540 ──
+  const codes = new Map();
+  codes.set('219540', {
+    patient_id: DEMO_PATIENT_ID,
+    patient_name: 'Meera Shah',
+    caregiver_name: 'Parthiv',
+    used: false,
+    expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+  });
+
+  // ── Medications ──
+  const demoMeds = [
+    { id: 1, temp_id: 'm1', drug_name: 'Metformin', strength: '500mg', dose_per_intake: 1, form: 'tablet', frequency_per_day: 2, timing_slots: ['08:30', '20:30'], food_instruction: 'after_food', duration_days: 30, is_chronic: false, is_prn: false, special_instructions_en: 'Take twice a day, after food, for 30 days.', confidence: 'high', status: 'active', stock_remaining: 48, stock_status: 'ok', patient_id: DEMO_PATIENT_ID },
+    { id: 2, temp_id: 'm2', drug_name: 'Amlodipine', strength: '5mg', dose_per_intake: 1, form: 'tablet', frequency_per_day: 1, timing_slots: ['08:30'], food_instruction: 'before_food', duration_days: 90, is_chronic: true, is_prn: false, special_instructions_en: 'Take once daily in the morning, before breakfast.', confidence: 'high', status: 'active', stock_remaining: 82, stock_status: 'ok', patient_id: DEMO_PATIENT_ID },
+    { id: 3, temp_id: 'm3', drug_name: 'Aspirin', strength: '75mg', dose_per_intake: 1, form: 'tablet', frequency_per_day: 1, timing_slots: ['13:00'], food_instruction: 'after_food', duration_days: 90, is_chronic: true, is_prn: false, special_instructions_en: 'Take once daily after lunch.', confidence: 'high', status: 'active', stock_remaining: 6, stock_status: 'refill_soon', patient_id: DEMO_PATIENT_ID },
+    { id: 4, temp_id: 'm4', drug_name: 'Pantoprazole', strength: '40mg', dose_per_intake: 1, form: 'tablet', frequency_per_day: 1, timing_slots: ['07:30'], food_instruction: 'before_food', duration_days: 14, is_chronic: false, is_prn: false, special_instructions_en: 'Take 30 minutes before breakfast on an empty stomach.', confidence: 'needs_review', status: 'active', stock_remaining: 10, stock_status: 'ok', patient_id: DEMO_PATIENT_ID },
+    { id: 5, temp_id: 'm5', drug_name: 'Clopidogrel', strength: '75mg', dose_per_intake: 1, form: 'tablet', frequency_per_day: 1, timing_slots: ['20:30'], food_instruction: 'with_food', duration_days: 30, is_chronic: false, is_prn: false, special_instructions_en: 'Take once daily with dinner.', confidence: 'high', status: 'active', stock_remaining: 30, stock_status: 'ok', patient_id: DEMO_PATIENT_ID },
+  ];
+  const medications = new Map();
+  medications.set(DEMO_PATIENT_ID, demoMeds);
+
+  // ── Prescriptions ──
+  const prescriptions = new Map();
+  prescriptions.set(DEMO_PATIENT_ID, [
+    { id: 5, doctor_name: 'Dr. Sharma', hospital_name: 'City Hospital', ai_confidence_overall: 94, status: 'active', uploaded_at: '2026-08-20T10:30:00', medication_count: 4, patient_id: DEMO_PATIENT_ID, patient_name: 'Meera Shah' },
+    { id: 4, doctor_name: 'Dr. Patel', hospital_name: 'Gujarat Medical', ai_confidence_overall: 87, status: 'reviewed', uploaded_at: '2026-08-15T09:00:00', medication_count: 3, patient_id: DEMO_PATIENT_ID, patient_name: 'Meera Shah' },
+  ]);
+
+  // ── Dose Logs — 7 days of history + today ──
+  const doseLogs = [];
+  let doseLogId = 1;
+
+  // Define daily schedule template
+  const dailyTemplate = [
+    { drug_name: 'Pantoprazole', strength: '40mg', dose_per_intake: 1, form: 'tablet', food_instruction: 'before_food', time: '07:30', medication_id: 4 },
+    { drug_name: 'Metformin', strength: '500mg', dose_per_intake: 1, form: 'tablet', food_instruction: 'after_food', time: '08:30', medication_id: 1 },
+    { drug_name: 'Amlodipine', strength: '5mg', dose_per_intake: 1, form: 'tablet', food_instruction: 'before_food', time: '08:30', medication_id: 2 },
+    { drug_name: 'Aspirin', strength: '75mg', dose_per_intake: 1, form: 'tablet', food_instruction: 'after_food', time: '13:00', medication_id: 3 },
+    { drug_name: 'Metformin', strength: '500mg', dose_per_intake: 1, form: 'tablet', food_instruction: 'after_food', time: '20:30', medication_id: 1 },
+    { drug_name: 'Clopidogrel', strength: '75mg', dose_per_intake: 1, form: 'tablet', food_instruction: 'with_food', time: '20:30', medication_id: 5 },
+  ];
+
+  // Past 6 days: generate varied statuses
+  const pastPatterns = [
+    // day -6: all taken
+    ['taken', 'taken', 'taken', 'taken', 'taken', 'taken'],
+    // day -5: 1 delayed
+    ['taken', 'taken', 'delayed', 'taken', 'taken', 'taken'],
+    // day -4: all taken
+    ['taken', 'taken', 'taken', 'taken', 'taken', 'taken'],
+    // day -3: 1 missed
+    ['taken', 'taken', 'taken', 'taken', 'missed', 'taken'],
+    // day -2: all taken
+    ['taken', 'taken', 'taken', 'taken', 'taken', 'taken'],
+    // day -1 (yesterday): 1 missed (evening Metformin), 1 delayed
+    ['taken', 'taken', 'delayed', 'taken', 'missed', 'taken'],
+  ];
+
+  for (let dayOffset = 6; dayOffset >= 1; dayOffset--) {
+    const dateStr = daysAgo(dayOffset);
+    const patternIdx = 6 - dayOffset;
+    const pattern = pastPatterns[patternIdx];
+
+    dailyTemplate.forEach((template, i) => {
+      const status = pattern[i];
+      let confirmed_at = null;
+      if (status === 'taken') {
+        // Taken ~5-10 min after scheduled
+        const mins = 3 + Math.floor(Math.random() * 7);
+        const [h, m] = template.time.split(':').map(Number);
+        const cm = m + mins;
+        confirmed_at = `${dateStr}T${String(h).padStart(2, '0')}:${String(cm % 60).padStart(2, '0')}:00`;
+      } else if (status === 'delayed') {
+        // Delayed ~30-45 min
+        const mins = 30 + Math.floor(Math.random() * 15);
+        const [h, m] = template.time.split(':').map(Number);
+        const totalMins = h * 60 + m + mins;
+        const ch = Math.floor(totalMins / 60);
+        const cm = totalMins % 60;
+        confirmed_at = `${dateStr}T${String(ch).padStart(2, '0')}:${String(cm).padStart(2, '0')}:00`;
+      }
+
+      doseLogs.push({
+        dose_log_id: doseLogId++,
+        drug_name: template.drug_name,
+        strength: template.strength,
+        dose_per_intake: template.dose_per_intake,
+        form: template.form,
+        food_instruction: template.food_instruction,
+        image_url: null,
+        audio_url: '/mock-audio.mp3',
+        scheduled_time: `${dateStr}T${template.time}:00`,
+        status: status,
+        confirmed_at: confirmed_at,
+        medication_id: template.medication_id,
+      });
+    });
+  }
+
+  // Today: Pantoprazole taken, Amlodipine taken, Metformin morning taken, rest upcoming
+  const todayPatterns = ['taken', 'taken', 'taken', 'upcoming', 'upcoming', 'upcoming'];
+  dailyTemplate.forEach((template, i) => {
+    const status = todayPatterns[i];
+    let confirmed_at = null;
+    if (status === 'taken') {
+      const mins = 3 + Math.floor(Math.random() * 7);
+      const [h, m] = template.time.split(':').map(Number);
+      const cm = m + mins;
+      confirmed_at = `${today}T${String(h).padStart(2, '0')}:${String(cm % 60).padStart(2, '0')}:00`;
+    }
+
+    doseLogs.push({
+      dose_log_id: doseLogId++,
+      drug_name: template.drug_name,
+      strength: template.strength,
+      dose_per_intake: template.dose_per_intake,
+      form: template.form,
+      food_instruction: template.food_instruction,
+      image_url: null,
+      audio_url: '/mock-audio.mp3',
+      scheduled_time: `${today}T${template.time}:00`,
+      status: status,
+      confirmed_at: confirmed_at,
+      medication_id: template.medication_id,
+    });
+  });
+
+  const doseLogsMap = new Map();
+  doseLogsMap.set(DEMO_PATIENT_ID, doseLogs);
+
+  // ── Alerts ──
+  const alerts = [
+    {
+      id: 1,
+      type: 'safety',
+      severity: 'red',
+      message: 'Potential interaction between Aspirin and Clopidogrel — increased bleeding risk.',
+      medicine: 'Aspirin 75mg + Clopidogrel 75mg',
+      time: '2026-08-20T10:30:00',
+      patient_id: DEMO_PATIENT_ID,
+      patient_name: 'Meera Shah',
+      explanation: 'Both medications affect blood clotting. Taking them together may increase the risk of bleeding.',
+      recommended_action: 'Confirm this combination with the prescribing doctor.',
+      status: 'active',
+    },
+    {
+      id: 2,
+      type: 'missed_dose',
+      severity: 'orange',
+      message: 'Meera missed Metformin 500mg (evening dose) yesterday.',
+      medicine: 'Metformin 500mg',
+      time: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+      patient_id: DEMO_PATIENT_ID,
+      patient_name: 'Meera Shah',
+      explanation: 'The evening dose was not confirmed within the scheduled window.',
+      recommended_action: 'Check with Meera about the missed dose and ensure she resumes the schedule.',
+      status: 'active',
+    },
+    {
+      id: 3,
+      type: 'system',
+      severity: 'yellow',
+      message: 'Aspirin 75mg — only 6 tablets remaining. Refill soon.',
+      medicine: 'Aspirin 75mg',
+      time: new Date().toISOString(),
+      patient_id: DEMO_PATIENT_ID,
+      patient_name: 'Meera Shah',
+      explanation: 'At current dosing, the remaining stock will last approximately 6 days.',
+      recommended_action: 'Arrange for a refill before stock runs out.',
+      status: 'active',
+    },
+  ];
+
+  return {
+    patients,
+    codes,
+    prescriptions,
+    medications,
+    doseLogs: doseLogsMap,
+    alerts,
+    counters: { p: 10, pr: 10, m: 10, d: doseLogId, a: 10 },
+  };
+}
+
+// ── Initialize state ──
 const initialState = loadState();
 
+// If no saved state, seed demo data for the Impactathon demo
+const _seed = initialState || seedDemoData();
+
 // ── Patients ──
-let _patients = initialState ? initialState.patients : [];
+let _patients = _seed.patients;
 
 // ── Connection codes
-const _codes = initialState ? initialState.codes : new Map();
+const _codes = _seed.codes;
 
 // ── Prescriptions per patient
-const _prescriptions = initialState ? initialState.prescriptions : new Map();
+const _prescriptions = _seed.prescriptions;
 
 // ── Medications per patient
-const _medications = initialState ? initialState.medications : new Map();
+const _medications = _seed.medications;
 
 // ── Dose logs per patient
-const _doseLogs = initialState ? initialState.doseLogs : new Map();
+const _doseLogs = _seed.doseLogs;
 
 // ── Alerts
-let _alerts = initialState ? initialState.alerts : [];
+let _alerts = _seed.alerts;
 
 // ── Next IDs
-let _nextPatientId = initialState ? initialState.counters.p : 100;
-let _nextPrescriptionId = initialState ? initialState.counters.pr : 100;
-let _nextMedicationId = initialState ? initialState.counters.m : 100;
-let _nextDoseLogId = initialState ? initialState.counters.d : 100;
-let _nextAlertId = initialState ? initialState.counters.a : 100;
+let _nextPatientId = _seed.counters.p;
+let _nextPrescriptionId = _seed.counters.pr;
+let _nextMedicationId = _seed.counters.m;
+let _nextDoseLogId = _seed.counters.d;
+let _nextAlertId = _seed.counters.a;
+
+// Persist initial seed if it was just generated
+if (!initialState) {
+  saveState();
+}
 
 // ═══════════════════════════════════════════════════
 //  Patient CRUD
@@ -246,7 +469,7 @@ export function storeGetTodaySchedule(patientId) {
 
   const completed = todayLogs.filter(l => l.status === 'taken');
   const pending = todayLogs.filter(l => l.status !== 'taken');
-  
+
   // Sort pending by time
   pending.sort((a, b) => new Date(a.scheduled_time) - new Date(b.scheduled_time));
 
@@ -288,10 +511,10 @@ export function storeUpdateMedicationSchedule(medicationId, patientId, newTiming
   // Regenerate dose logs for today with new times
   const logs = _doseLogs.get(patientId) || [];
   const today = new Date().toISOString().split('T')[0];
-  
+
   // Remove today's unconfirmed logs for this medication
   const filtered = logs.filter(l => !(l.medication_id === medicationId && l.scheduled_time.startsWith(today) && l.status !== 'taken'));
-  
+
   // Add new logs with updated times
   newTimingSlots.forEach(slot => {
     // Check if there's already a confirmed log at this time
@@ -325,8 +548,10 @@ export function storeUpdateMedicationSchedule(medicationId, patientId, newTiming
 
 export function storeGetHistory(patientId) {
   const logs = _doseLogs.get(patientId) || [];
+  // Sort most recent first
+  const sorted = [...logs].sort((a, b) => new Date(b.scheduled_time) - new Date(a.scheduled_time));
   return {
-    logs: logs.map(l => ({
+    logs: sorted.map(l => ({
       medicine: `${l.drug_name} ${l.strength}`,
       scheduled_time: l.scheduled_time,
       status: l.status,
@@ -347,7 +572,7 @@ export function storeGetDashboard(patientId) {
   const taken = todayLogs.filter(l => l.status === 'taken').length;
   const total = todayLogs.length;
 
-  // Generate 7-day adherence (mock-ish but based on actual logs)
+  // Generate 7-day adherence based on actual logs
   const weekly = [];
   for (let i = 6; i >= 0; i--) {
     const d = new Date();
@@ -361,13 +586,39 @@ export function storeGetDashboard(patientId) {
     });
   }
 
+  // Build recent activity from logs + alerts
+  const recent_activity = [];
+  // Add dose events from today
+  const todayCompletedLogs = todayLogs
+    .filter(l => l.status === 'taken' && l.confirmed_at)
+    .sort((a, b) => new Date(b.confirmed_at) - new Date(a.confirmed_at));
+  todayCompletedLogs.forEach(l => {
+    recent_activity.push({
+      type: 'dose_confirmed',
+      message: `Meera confirmed ${l.drug_name} ${l.strength}`,
+      time: l.confirmed_at,
+    });
+  });
+  // Add alert events
+  _alerts.filter(a => a.patient_id === patientId || patientId === undefined).forEach(a => {
+    recent_activity.push({
+      type: 'alert_generated',
+      message: a.message,
+      time: a.time,
+    });
+  });
+  // Sort by time desc
+  recent_activity.sort((a, b) => new Date(b.time) - new Date(a.time));
+
   return {
     adherence_today: { taken, total, percent: total > 0 ? Math.round((taken / total) * 100) : 0 },
     weekly_adherence: weekly,
     alerts: _alerts.filter(a => a.patient_id === patientId || patientId === undefined),
-    upcoming_appointments: [],
+    upcoming_appointments: [
+      { purpose: 'Follow-up review', doctor_name: 'Dr. Sharma', appointment_datetime: '2026-08-27T11:00:00' },
+    ],
     medications: meds.filter(m => m.status === 'active'),
-    recent_activity: [],
+    recent_activity: recent_activity.slice(0, 10),
   };
 }
 
@@ -378,6 +629,22 @@ export function storeGetDashboard(patientId) {
 export function storeGetAlerts(status = 'active') {
   if (status === 'all') return [..._alerts];
   return _alerts.filter(a => a.status === status);
+}
+
+export function storeReviewAlert(alertId) {
+  const alert = _alerts.find(a => a.id === alertId);
+  if (alert) {
+    alert.status = 'reviewed';
+    saveState();
+  }
+}
+
+export function storeResolveAlert(alertId) {
+  const alert = _alerts.find(a => a.id === alertId);
+  if (alert) {
+    alert.status = 'resolved';
+    saveState();
+  }
 }
 
 // ═══════════════════════════════════════════════════

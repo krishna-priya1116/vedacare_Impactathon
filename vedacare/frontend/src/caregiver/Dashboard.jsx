@@ -76,11 +76,16 @@ export default function Dashboard() {
   const activeAlerts = alerts.filter(a => a.status === 'active');
   const safetyAlerts = activeAlerts.filter(a => a.type === 'safety');
 
+  // Determine IST-based greeting
+  const istHour = new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata', hour: 'numeric', hour12: false });
+  const h = parseInt(istHour, 10);
+  const greeting = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : h < 21 ? 'Good evening' : 'Good night';
+
   return (
     <div className="fade-in pb-8">
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-text mb-2">Welcome back, {user?.name}</h1>
+          <h1 className="text-3xl font-bold text-text mb-2">{greeting}, {user?.name}</h1>
           <p className="text-text-secondary">Here's what's happening with your patients today.</p>
         </div>
         

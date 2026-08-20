@@ -6,12 +6,12 @@ export default function Settings() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('account');
   const [saving, setSaving] = useState(false);
-  
+
   // Settings State
   const [settings, setSettings] = useState({
     account: {
       name: user?.name || 'Caregiver',
-      email: 'caregiver@example.com',
+      email: 'parthiv@gmail.com',
       phone: user?.phone || '+91 9876543210',
     },
     patient: {
@@ -64,7 +64,7 @@ export default function Settings() {
           <h1 className="text-3xl font-bold text-text mb-2">Settings</h1>
           <p className="text-text-secondary">Manage your account, notifications, and patient preferences.</p>
         </div>
-        <button 
+        <button
           onClick={handleSave}
           disabled={saving}
           className="btn btn-primary flex items-center gap-2"
@@ -81,11 +81,10 @@ export default function Settings() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
-                activeTab === tab.id 
-                  ? 'bg-primary-50 text-primary font-semibold' 
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${activeTab === tab.id
+                  ? 'bg-primary-50 text-primary font-semibold'
                   : 'text-text-secondary hover:bg-bg hover:text-text'
-              }`}
+                }`}
             >
               <tab.icon size={18} className={activeTab === tab.id ? 'text-primary' : ''} />
               {tab.label}
@@ -96,35 +95,35 @@ export default function Settings() {
         {/* Content */}
         <div className="md:col-span-3">
           <div className="card p-6">
-            
+
             {activeTab === 'account' && (
               <div className="space-y-6 fade-in">
                 <h2 className="text-xl font-bold border-b border-border-light pb-2 mb-4">Account Details</h2>
-                
+
                 <div className="grid gap-4 max-w-md">
                   <div>
                     <label className="block text-sm font-semibold text-text-secondary mb-1">Full Name</label>
-                    <input 
-                      type="text" 
-                      className="input" 
+                    <input
+                      type="text"
+                      className="input"
                       value={settings.account.name}
                       onChange={(e) => updateSetting('account', 'name', e.target.value)}
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-text-secondary mb-1">Email Address</label>
-                    <input 
-                      type="email" 
-                      className="input" 
+                    <input
+                      type="email"
+                      className="input"
                       value={settings.account.email}
                       onChange={(e) => updateSetting('account', 'email', e.target.value)}
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-text-secondary mb-1">Phone Number</label>
-                    <input 
-                      type="tel" 
-                      className="input" 
+                    <input
+                      type="tel"
+                      className="input"
                       value={settings.account.phone}
                       onChange={(e) => updateSetting('account', 'phone', e.target.value)}
                     />
@@ -139,13 +138,13 @@ export default function Settings() {
             {activeTab === 'patient' && (
               <div className="space-y-6 fade-in">
                 <h2 className="text-xl font-bold border-b border-border-light pb-2 mb-4">Patient Settings</h2>
-                
+
                 <div className="grid gap-4 max-w-md">
                   <div>
                     <label className="block text-sm font-semibold text-text-secondary mb-1">Active Patient</label>
-                    <input 
-                      type="text" 
-                      className="input bg-bg text-text-secondary cursor-not-allowed" 
+                    <input
+                      type="text"
+                      className="input bg-bg text-text-secondary cursor-not-allowed"
                       value={settings.patient.patientInfo}
                       disabled
                     />
@@ -155,7 +154,7 @@ export default function Settings() {
                     <label className="block text-sm font-semibold text-text-secondary mb-1 flex items-center gap-2">
                       <Globe size={16} /> Patient Language
                     </label>
-                    <select 
+                    <select
                       className="input"
                       value={settings.patient.language}
                       onChange={(e) => updateSetting('patient', 'language', e.target.value)}
@@ -168,7 +167,7 @@ export default function Settings() {
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-text-secondary mb-1">Time Zone</label>
-                    <select 
+                    <select
                       className="input"
                       value={settings.patient.timeZone}
                       onChange={(e) => updateSetting('patient', 'timeZone', e.target.value)}
@@ -179,7 +178,7 @@ export default function Settings() {
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-text-secondary mb-1">Accessibility Mode</label>
-                    <select 
+                    <select
                       className="input"
                       value={settings.patient.accessibility}
                       onChange={(e) => updateSetting('patient', 'accessibility', e.target.value)}
@@ -196,29 +195,29 @@ export default function Settings() {
             {activeTab === 'notifications' && (
               <div className="space-y-6 fade-in">
                 <h2 className="text-xl font-bold border-b border-border-light pb-2 mb-4">Notification Preferences</h2>
-                
+
                 <div className="space-y-4">
                   <label className="flex items-center justify-between p-3 border border-border-light rounded-lg hover:bg-bg transition-colors cursor-pointer">
                     <div>
                       <h4 className="font-semibold text-text">Missed Dose Alerts</h4>
                       <p className="text-sm text-text-secondary">Get notified immediately when a patient misses a scheduled dose.</p>
                     </div>
-                    <input 
-                      type="checkbox" 
-                      className="w-5 h-5 accent-primary" 
+                    <input
+                      type="checkbox"
+                      className="w-5 h-5 accent-primary"
                       checked={settings.notifications.missedDose}
                       onChange={(e) => updateSetting('notifications', 'missedDose', e.target.checked)}
                     />
                   </label>
-                  
+
                   <label className="flex items-center justify-between p-3 border border-border-light rounded-lg hover:bg-bg transition-colors cursor-pointer">
                     <div>
                       <h4 className="font-semibold text-text">Safety & Interaction Alerts</h4>
                       <p className="text-sm text-text-secondary">Receive warnings about potentially dangerous medication interactions.</p>
                     </div>
-                    <input 
-                      type="checkbox" 
-                      className="w-5 h-5 accent-primary" 
+                    <input
+                      type="checkbox"
+                      className="w-5 h-5 accent-primary"
                       checked={settings.notifications.safetyAlerts}
                       onChange={(e) => updateSetting('notifications', 'safetyAlerts', e.target.checked)}
                     />
@@ -229,9 +228,9 @@ export default function Settings() {
                       <h4 className="font-semibold text-text">Daily Reminders</h4>
                       <p className="text-sm text-text-secondary">Get a daily summary of upcoming medications.</p>
                     </div>
-                    <input 
-                      type="checkbox" 
-                      className="w-5 h-5 accent-primary" 
+                    <input
+                      type="checkbox"
+                      className="w-5 h-5 accent-primary"
                       checked={settings.notifications.reminders}
                       onChange={(e) => updateSetting('notifications', 'reminders', e.target.checked)}
                     />
@@ -239,7 +238,7 @@ export default function Settings() {
 
                   <div className="mt-6 max-w-sm">
                     <label className="block text-sm font-semibold text-text-secondary mb-1">Escalation Timing</label>
-                    <select 
+                    <select
                       className="input"
                       value={settings.notifications.escalationTiming}
                       onChange={(e) => updateSetting('notifications', 'escalationTiming', e.target.value)}
@@ -257,7 +256,7 @@ export default function Settings() {
             {activeTab === 'security' && (
               <div className="space-y-6 fade-in">
                 <h2 className="text-xl font-bold border-b border-border-light pb-2 mb-4">Security Settings</h2>
-                
+
                 <div className="space-y-6">
                   <div className="flex items-center justify-between p-4 bg-bg rounded-lg border border-border-light">
                     <div className="flex items-center gap-3">
@@ -287,7 +286,7 @@ export default function Settings() {
                         </div>
                         <span className="badge bg-success/10 text-success font-medium">Active</span>
                       </div>
-                      
+
                       <div className="flex items-center justify-between p-3 border border-border-light rounded-lg opacity-70">
                         <div className="flex items-center gap-3">
                           <Smartphone size={18} className="text-text-secondary" />

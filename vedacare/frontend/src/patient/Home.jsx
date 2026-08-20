@@ -45,9 +45,10 @@ export default function Home() {
   const hasMedications = progress && progress.total > 0;
   const percentComplete = hasMedications ? Math.round((progress.taken / progress.total) * 100) : 0;
 
-  // Determine greeting based on time of day
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  // Determine greeting based on IST (Asia/Kolkata)
+  const istHour = new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata', hour: 'numeric', hour12: false });
+  const h = parseInt(istHour, 10);
+  const greeting = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : h < 21 ? 'Good evening' : 'Good night';
 
   return (
     <div className="fade-in max-w-lg mx-auto p-4">

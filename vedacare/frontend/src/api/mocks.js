@@ -3,7 +3,7 @@
 
 export const mockCaregiver = {
   id: 1,
-  name: 'Parthiv Shah',
+  name: 'Parthiv',
   contact: 'parthiv@email.com',
   token: 'mock-jwt-token-caregiver',
 };

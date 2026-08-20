@@ -21,6 +21,8 @@ import {
   storeGetAlerts,
   storeSetCaregiverName,
   storeUpdateMedicationSchedule,
+  storeReviewAlert,
+  storeResolveAlert,
 } from './store';
 
 import {
@@ -41,6 +43,20 @@ export async function signup({ name, contact, password }) {
 
 export async function login({ contact, password }) {
   await delay();
+
+  // ── Demo account: parthiv@gmail.com / parthiv1 ──
+  if (contact === 'parthiv@gmail.com' && password === 'parthiv1') {
+    return {
+      success: true,
+      role: 'caregiver',
+      token: 'mock-jwt-token-caregiver',
+      redirect: '/caregiver',
+      name: 'Parthiv',
+      caregiver_id: 1,
+    };
+  }
+
+  // Existing generic mock login
   if (contact.toLowerCase().includes('patient')) {
     return mockAuthResponses.login_patient;
   }
@@ -202,11 +218,13 @@ export async function getAlerts(caregiverId, status = 'active') {
 
 export async function reviewAlert(alertId) {
   await delay();
+  storeReviewAlert(alertId);
   return { success: true };
 }
 
 export async function resolveAlert(alertId) {
   await delay();
+  storeResolveAlert(alertId);
   return { success: true };
 }
 
